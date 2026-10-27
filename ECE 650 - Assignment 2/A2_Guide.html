@@ -1,0 +1,911 @@
+<title>ece650-a2 Walkthrough</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap">
+<style>
+/* Layout: engineering notebook. Sticky contents rail on the left, one reading column on the right; stacks to one column on phones. */
+:root {
+  --bg: #f6f8f9;
+  --surface: #ffffff;
+  --ink: #15202a;
+  --muted: #566371;
+  --rule: #dce2e7;
+  --accent: #0c6a72;
+  --accent-soft: #e0eff0;
+  --err: #ad3529;
+  --err-soft: #fbe9e6;
+  --ok: #2c7a39;
+  --ok-soft: #e4f2e6;
+  --code-bg: #eef2f4;
+  --tk-kw: #8a2f8f;
+  --tk-type: #0c6a72;
+  --tk-str: #8a5a00;
+  --tk-com: #6f7c88;
+  --tk-num: #1b5fae;
+  --font-display: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --font-body: "IBM Plex Sans", -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1418; --surface: #151c22; --ink: #e3e8ed; --muted: #93a1ae; --rule: #25303a;
+    --accent: #5bc1c8; --accent-soft: #123136; --err: #f08a7e; --err-soft: #3a1b18;
+    --ok: #7cc489; --ok-soft: #16301b; --code-bg: #111920;
+    --tk-kw: #d99ade; --tk-type: #5bc1c8; --tk-str: #e2b866; --tk-com: #7d8b97; --tk-num: #86b6f0;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1418; --surface: #151c22; --ink: #e3e8ed; --muted: #93a1ae; --rule: #25303a;
+  --accent: #5bc1c8; --accent-soft: #123136; --err: #f08a7e; --err-soft: #3a1b18;
+  --ok: #7cc489; --ok-soft: #16301b; --code-bg: #111920;
+  --tk-kw: #d99ade; --tk-type: #5bc1c8; --tk-str: #e2b866; --tk-com: #7d8b97; --tk-num: #86b6f0;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 64px;
+}
+a { color: var(--accent); text-underline-offset: 2px; }
+a:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+code, pre, kbd { font-family: var(--font-mono); }
+:not(pre) > code {
+  font-size: 0.88em;
+  background: var(--code-bg);
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+  overflow-wrap: anywhere;
+}
+
+.shell { max-width: 1120px; margin: 0 auto; }
+
+/* Header */
+header.top { padding-block: 48px 32px; border-bottom: 1px solid var(--rule); }
+.eyebrow {
+  font-family: var(--font-mono); font-size: 12.5px; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--accent); margin: 0 0 12px;
+}
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; line-height: 1.2; margin: 0; }
+h1 { font-size: clamp(30px, 5vw, 44px); font-weight: 700; }
+.lede { max-width: 66ch; color: var(--muted); font-size: 18px; margin: 14px 0 0; }
+.facts { display: flex; flex-wrap: wrap; gap: 10px 28px; margin: 24px 0 0; padding: 0; list-style: none; }
+.facts li { display: flex; flex-direction: column; }
+.facts dt, .facts .k { font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.facts .v { font-family: var(--font-mono); font-size: 14.5px; }
+
+/* Two-column body */
+.layout { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 48px; padding-top: 36px; }
+nav.toc { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 20px); align-self: start; font-size: 14px; }
+nav.toc p { font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin: 0 0 8px; }
+nav.toc ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+nav.toc a { display: block; padding: 4px 10px; border-left: 2px solid var(--rule); color: var(--ink); text-decoration: none; }
+nav.toc a:hover { border-left-color: var(--accent); color: var(--accent); }
+nav.toc .sub a { padding-left: 22px; font-size: 13px; color: var(--muted); }
+
+main { min-width: 0; }
+section { padding-bottom: 40px; margin-bottom: 40px; border-bottom: 1px solid var(--rule); }
+section:last-child { border-bottom: 0; }
+h2 { font-size: 28px; font-weight: 700; margin-bottom: 14px; scroll-margin-top: 20px; }
+h2 .num { font-family: var(--font-mono); font-size: 15px; color: var(--accent); font-weight: 500; margin-right: 10px; vertical-align: 4px; }
+h3 { font-size: 20px; font-weight: 600; margin: 32px 0 10px; scroll-margin-top: 20px; }
+main p, main li { max-width: 70ch; }
+main ul, main ol { padding-left: 22px; }
+main li + li { margin-top: 4px; }
+
+/* Code blocks */
+.code { margin: 16px 0; border: 1px solid var(--rule); border-radius: 8px; background: var(--code-bg); overflow: hidden; }
+.code .cap {
+  display: flex; justify-content: space-between; gap: 12px; padding: 6px 12px;
+  border-bottom: 1px solid var(--rule); font-family: var(--font-mono); font-size: 12.5px; color: var(--muted);
+}
+.code pre { margin: 0; padding: 14px 16px; overflow-x: auto; font-size: 13.5px; line-height: 1.55; }
+.code pre code { background: none; padding: 0; }
+.hljs-keyword, .hljs-built_in, .hljs-meta .hljs-keyword { color: var(--tk-kw); }
+.hljs-type, .hljs-title, .hljs-title.function_, .hljs-title.class_ { color: var(--tk-type); }
+.hljs-string, .hljs-meta .hljs-string, .hljs-regexp { color: var(--tk-str); }
+.hljs-comment { color: var(--tk-com); font-style: italic; }
+.hljs-number, .hljs-literal { color: var(--tk-num); }
+.hljs-meta { color: var(--tk-com); }
+
+/* Explanation notes beside code */
+.note { border-left: 3px solid var(--accent); background: var(--accent-soft); padding: 10px 14px; border-radius: 0 6px 6px 0; margin: 16px 0; max-width: 70ch; }
+.note.warn { border-left-color: var(--err); background: var(--err-soft); }
+.note p { margin: 0; }
+
+/* Tables */
+.tbl { overflow-x: auto; margin: 16px 0; border: 1px solid var(--rule); border-radius: 8px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; }
+th, td { text-align: left; vertical-align: top; padding: 9px 12px; border-bottom: 1px solid var(--rule); }
+tr:last-child td { border-bottom: 0; }
+th { font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); font-weight: 600; background: var(--code-bg); }
+td code { white-space: nowrap; }
+td.mono { font-family: var(--font-mono); font-size: 13px; white-space: pre; }
+.pill { display: inline-block; font-family: var(--font-mono); font-size: 12px; padding: 1px 8px; border-radius: 999px; white-space: nowrap; }
+.pill.ok { background: var(--ok-soft); color: var(--ok); }
+.pill.err { background: var(--err-soft); color: var(--err); }
+.pill.src { background: var(--code-bg); color: var(--muted); }
+
+/* Terminal transcript with stream labels */
+.term { margin: 16px 0; border: 1px solid var(--rule); border-radius: 8px; background: var(--surface); overflow-x: auto; font-family: var(--font-mono); font-size: 13px; }
+.term .row { display: grid; grid-template-columns: 64px minmax(max-content, 1fr); gap: 12px; padding: 2px 12px; }
+.term .row:first-child { padding-top: 10px; }
+.term .row:last-child { padding-bottom: 10px; }
+.term .s { color: var(--muted); font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; padding-top: 2px; }
+.term .in .t { color: var(--muted); }
+.term .out .t { color: var(--ok); font-weight: 500; }
+.term .out .s { color: var(--ok); }
+.term .err .t { color: var(--err); }
+.term .err .s { color: var(--err); }
+.term .t { white-space: pre; }
+
+/* Steps */
+.step-meta { font-family: var(--font-mono); font-size: 12.5px; color: var(--muted); margin: -4px 0 8px; }
+
+pre.mermaid { background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; padding: 16px; overflow-x: auto; text-align: center; }
+
+.alt-group { margin-top: 28px; }
+.alt-group > h3 { margin-top: 0; }
+
+@media (max-width: 900px) {
+  .layout { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  nav.toc { position: static; border: 1px solid var(--rule); border-radius: 8px; padding: 12px; background: var(--surface); margin-bottom: 24px; }
+  nav.toc .sub { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+</style>
+
+<div class="shell">
+  <header class="top">
+    <p class="eyebrow">ECE 650 · Fall 2026 · Assignment 2</p>
+    <h1>Shortest paths with <code style="font-size:0.85em">ece650-a2</code></h1>
+    <p class="lede">A walkthrough of the problem, the code we wrote, every formatting and error rule from the handout and the clarification page, and how each one was tested.</p>
+    <ul class="facts">
+      <li><span class="k">Language</span><span class="v">C++11</span></li>
+      <li><span class="k">Algorithm</span><span class="v">Breadth-first search</span></li>
+      <li><span class="k">Executable</span><span class="v">ece650-a2</span></li>
+      <li><span class="k">Source files</span><span class="v">3 (+ CMakeLists.txt)</span></li>
+      <li><span class="k">Due</span><span class="v">2026-10-25, 23:59</span></li>
+    </ul>
+  </header>
+
+  <div class="layout">
+    <nav class="toc" aria-label="Contents">
+      <p>Contents</p>
+      <ol>
+        <li><a href="#problem">1. Problem statement</a></li>
+        <li><a href="#rules">2. Rules and how we met them</a></li>
+        <li><a href="#approach">3. Approach, step by step</a></li>
+        <li class="sub"><a href="#s1">Plan the structure</a></li>
+        <li class="sub"><a href="#s2">Represent the graph</a></li>
+        <li class="sub"><a href="#s4">Store edges</a></li>
+        <li class="sub"><a href="#s5">BFS shortest path</a></li>
+        <li class="sub"><a href="#s6">Input loop</a></li>
+        <li class="sub"><a href="#s8">Handle V</a></li>
+        <li class="sub"><a href="#s9">Handle E</a></li>
+        <li class="sub"><a href="#s10">Handle s</a></li>
+        <li class="sub"><a href="#s12">Build and docs</a></li>
+        <li><a href="#testing">4. How we tested</a></li>
+        <li><a href="#results">5. Results</a></li>
+        <li><a href="#alternatives">6. Alternative approaches</a></li>
+      </ol>
+    </nav>
+
+    <main>
+      <!-- 1 -->
+      <section id="problem">
+        <h2><span class="num">01</span>Problem statement</h2>
+        <p>Write a C++ program that reads commands from standard input until it sees end-of-file (EOF). The commands describe an <strong>undirected, unweighted graph</strong> and ask for <strong>shortest paths</strong> in it. The program has to work interactively: it answers each command as soon as it is read.</p>
+
+        <h3>The three commands</h3>
+        <div class="tbl"><table>
+          <thead><tr><th>Command</th><th>Example</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr><td><code>V</code></td><td><code>V 15</code></td><td>Start a new graph with vertices <code>1, 2, …, 15</code>. The number must be greater than one. Everything about the previous graph is forgotten.</td></tr>
+            <tr><td><code>E</code></td><td><code>E {&lt;2,6&gt;,&lt;2,8&gt;}</code></td><td>The edge set of the current graph. Each edge is <code>&lt;a,b&gt;</code>, edges are separated by commas, the whole set is inside <code>{ }</code>, and there is no whitespace inside the braces.</td></tr>
+            <tr><td><code>s</code></td><td><code>s 2 10</code></td><td>Print one shortest path from vertex 2 to vertex 10, as vertex IDs joined by <code>-</code>, for example <code>2-8-10</code>.</td></tr>
+          </tbody>
+        </table></div>
+
+        <h3>Sample run from the handout</h3>
+        <p>Lines marked <em>stdin</em> are typed by the user; lines marked <em>stdout</em> are printed by the program.</p>
+        <div class="term" role="group" aria-label="Sample run">
+          <div class="row in"><span class="s">stdin</span><span class="t">V 15</span></div>
+          <div class="row in"><span class="s">stdin</span><span class="t">E {&lt;2,6&gt;,&lt;2,8&gt;,&lt;2,5&gt;,&lt;6,5&gt;,&lt;5,8&gt;,&lt;6,10&gt;,&lt;10,8&gt;}</span></div>
+          <div class="row in"><span class="s">stdin</span><span class="t">s 2 10</span></div>
+          <div class="row out"><span class="s">stdout</span><span class="t">2-8-10</span></div>
+          <div class="row in"><span class="s">stdin</span><span class="t">V 5</span></div>
+          <div class="row in"><span class="s">stdin</span><span class="t">E {&lt;1,3&gt;,&lt;3,2&gt;,&lt;3,4&gt;,&lt;4,5&gt;,&lt;5,2&gt;}</span></div>
+          <div class="row in"><span class="s">stdin</span><span class="t">s 5 1</span></div>
+          <div class="row out"><span class="s">stdout</span><span class="t">5-2-3-1</span></div>
+        </div>
+        <div class="note"><p>In the PDF the two <code>E</code> lines show up at the bottom of the sample, after the outputs. That is a page-layout quirk. The text of the handout says <code>V</code> is always followed by its <code>E</code>, so the real order is the one shown above.</p></div>
+
+        <h3>What gets marked</h3>
+        <div class="tbl"><table>
+          <thead><tr><th>Component</th><th>Weight</th></tr></thead>
+          <tbody>
+            <tr><td>Test cases 1, 2 and 3</td><td>15% + 15% + 10%</td></tr>
+            <tr><td>Correctly detect errors</td><td>20%</td></tr>
+            <tr><td>Report and documentation (README with a mermaid diagram)</td><td>15%</td></tr>
+            <tr><td>Programming style</td><td>5%</td></tr>
+          </tbody>
+        </table></div>
+        <p>Marking is automated, so output has to match exactly. Code that does not build from scratch gets a default grade of 0 before manual review.</p>
+      </section>
+
+      <!-- 2 -->
+      <section id="rules">
+        <h2><span class="num">02</span>Rules and how we met them</h2>
+        <p>Rules come from two places: the assignment handout (<span class="pill src">handout</span>) and the clarification page <code>a2-updated-specs.md</code> in the skeleton repo (<span class="pill src">clarification</span>). Every rule below maps to a specific piece of code.</p>
+
+        <h3>Input, output and error stream rules</h3>
+        <div class="tbl"><table>
+          <thead><tr><th>Rule</th><th>Source</th><th>How we follow it</th></tr></thead>
+          <tbody>
+            <tr><td>Read from stdin until EOF, then exit gracefully and quietly.</td><td><span class="pill src">handout</span></td><td><code>while (std::getline(std::cin, line))</code> ends on EOF, then <code>main</code> returns 0 without printing anything.</td></tr>
+            <tr><td>Normal output goes to stdout.</td><td><span class="pill src">handout</span></td><td>Only paths are written, with <code>std::cout</code>, in <code>handleS</code>.</td></tr>
+            <tr><td>Errors go to stderr and start with <code>Error:</code> followed by a short description.</td><td><span class="pill src">handout</span> <span class="pill src">clarification</span></td><td>Every error goes through one function, <code>reportError</code>, which writes <code>"Error: " + msg</code> to <code>std::cerr</code>. No other code writes to stderr.</td></tr>
+            <tr><td>No extra output, such as prompts.</td><td><span class="pill src">handout</span></td><td>The program prints nothing except paths and error lines. Blank lines in the input are skipped silently.</td></tr>
+            <tr><td>Respond to errors immediately, not at the end.</td><td><span class="pill src">clarification</span></td><td>Each command is handled as soon as its line is read, and output uses <code>std::endl</code>, which flushes the stream right away.</td></tr>
+            <tr><td>Path output is vertex IDs separated by <code>-</code>, with no whitespace.</td><td><span class="pill src">handout</span></td><td><code>handleS</code> writes a <code>-</code> before every vertex except the first, then a newline. Nothing else goes on the line.</td></tr>
+            <tr><td>Only one shortest path per query; any one is fine when there are ties.</td><td><span class="pill src">handout</span></td><td>BFS returns the first shortest path it finds.</td></tr>
+          </tbody>
+        </table></div>
+
+        <h3>Graph and command rules</h3>
+        <div class="tbl"><table>
+          <thead><tr><th>Rule</th><th>Source</th><th>How we follow it</th></tr></thead>
+          <tbody>
+            <tr><td><code>V i</code> means vertices <code>1..i</code>; <code>i</code> must be greater than one. <code>V 0</code> and <code>V 1</code> are errors, and the program keeps running.</td><td><span class="pill src">handout</span> <span class="pill src">clarification</span></td><td><code>handleV</code> rejects <code>n &lt;= 1</code> with an error. The graph is left with no valid vertex set.</td></tr>
+            <tr><td>A new <code>V</code> forgets all previous graph information.</td><td><span class="pill src">handout</span> <span class="pill src">clarification</span></td><td><code>handleV</code> calls <code>g.invalidate()</code> first, before it even checks the number.</td></tr>
+            <tr><td><code>V</code> and <code>E</code> come together, in that order. <code>V-E-E</code> will not appear.</td><td><span class="pill src">handout</span> <span class="pill src">clarification</span></td><td>No extra handling needed. If an <code>E</code> arrives without a valid <code>V</code> (after <code>V 1</code>, say), it gets an error.</td></tr>
+            <tr><td>Input syntax is always correct; only semantic errors are tested.</td><td><span class="pill src">handout</span> <span class="pill src">clarification</span></td><td>Parsing is kept simple. The checks focus on meaning: ranges, missing graphs, unreachable vertices.</td></tr>
+            <tr><td>Vertex IDs outside <code>1..i</code> are errors, including 0 and negatives, in both <code>E</code> and <code>s</code>.</td><td><span class="pill src">handout</span> <span class="pill src">clarification</span></td><td>Numbers are parsed as signed <code>long long</code>, so <code>-1</code> is read correctly and then fails <code>isValidVertex</code>.</td></tr>
+            <tr><td>After an invalid <code>E</code>, print the error and keep running.</td><td><span class="pill src">clarification</span></td><td><code>handleE</code> rejects the whole edge set, prints one error and returns. The vertex set stays.</td></tr>
+            <tr><td><code>E {}</code> should ideally be an error, and must not crash.</td><td><span class="pill src">clarification</span></td><td>We print <code>Error: empty edge set</code> and keep the vertices, so <code>s v v</code> still works.</td></tr>
+            <tr><td>Isolated vertices are allowed.</td><td><span class="pill src">clarification</span></td><td>Vertices do not need an entry in the adjacency map to be valid. Validity comes only from <code>1..n</code>.</td></tr>
+            <tr><td><code>s v v</code> with a valid <code>v</code> prints just <code>v</code>.</td><td><span class="pill src">clarification</span></td><td><code>shortestPath</code> returns <code>{src}</code> when <code>src == dst</code>.</td></tr>
+            <tr><td><code>s v w</code> with no path between them is an error.</td><td><span class="pill src">handout</span> <span class="pill src">clarification</span></td><td>An empty path from BFS leads to <code>Error: no path exists between v and w</code>.</td></tr>
+            <tr><td>Self-loops may be ignored or stored, as long as nothing breaks.</td><td><span class="pill src">clarification</span></td><td><code>setEdges</code> skips them.</td></tr>
+            <tr><td>Duplicate edges (<code>&lt;1,2&gt;</code> twice, or <code>&lt;1,2&gt;</code> and <code>&lt;2,1&gt;</code>) are not errors.</td><td><span class="pill src">clarification</span></td><td>Neighbours are kept in an <code>unordered_set</code>, so duplicates merge into one edge.</td></tr>
+          </tbody>
+        </table></div>
+
+        <h3>Submission rules</h3>
+        <div class="tbl"><table>
+          <thead><tr><th>Rule</th><th>How we follow it</th></tr></thead>
+          <tbody>
+            <tr><td>All files in the <code>a2</code> directory on the <code>main</code> branch.</td><td>Everything lives in <code>a2/</code>.</td></tr>
+            <tr><td>Builds with <code>cd a2 &amp;&amp; mkdir build &amp;&amp; cd build &amp;&amp; cmake ../ &amp;&amp; make</code>.</td><td><code>CMakeLists.txt</code> sits in <code>a2/</code> and needs no extra options.</td></tr>
+            <tr><td>Executable named <code>ece650-a2</code>.</td><td><code>add_executable(ece650-a2 …)</code>.</td></tr>
+            <tr><td><code>README.md</code> with repo docs and a report: approach, design, a mermaid diagram, challenges and decisions.</td><td><code>a2/README.md</code> has a file table, build steps, a mermaid flowchart, a design-decision list and a challenges section.</td></tr>
+            <tr><td><code>user.yml</code> with name, WatIAM and student number.</td><td>Present, with placeholders you need to fill in.</td></tr>
+            <tr><td>Concise, useful inline comments.</td><td>Each file and function has a short header comment. Comments explain <em>why</em> rather than restating the code.</td></tr>
+          </tbody>
+        </table></div>
+      </section>
+
+      <!-- 3 -->
+      <section id="approach">
+        <h2><span class="num">03</span>Approach, step by step</h2>
+        <p>The steps below follow the order the code was designed in: structure first, then the graph, then the command handlers that sit on top of it.</p>
+
+        <h3 id="s1">Step 1 · Plan the structure</h3>
+        <p class="step-meta">a2/ · 6 files</p>
+        <p>Keep two jobs apart. The <strong>graph</strong> stores vertices and edges and knows how to find a path. The <strong>command layer</strong> reads text, checks it, and decides what to print. That way the BFS never deals with strings, and the parser never deals with queues.</p>
+        <div class="tbl"><table>
+          <thead><tr><th>File</th><th>Role</th></tr></thead>
+          <tbody>
+            <tr><td><code>graph.hpp</code></td><td>Declares the <code>Graph</code> class.</td></tr>
+            <tr><td><code>graph.cpp</code></td><td>Implements edge storage and BFS.</td></tr>
+            <tr><td><code>ece650-a2.cpp</code></td><td><code>main()</code>, the input loop, and the three command handlers.</td></tr>
+            <tr><td><code>CMakeLists.txt</code></td><td>Builds the executable.</td></tr>
+            <tr><td><code>README.md</code>, <code>user.yml</code></td><td>Report and student info.</td></tr>
+          </tbody>
+        </table></div>
+        <p>How one line of input flows through the program:</p>
+        <pre class="mermaid">
+flowchart TD
+    IN[stdin line] --> P{first token}
+    P -- "V n" --> V{n > 1?}
+    V -- yes --> RESET[Graph.reset n]
+    V -- no --> ERR
+    P -- "E {...}" --> EV{valid V and all endpoints in 1..n?}
+    EV -- yes --> SET[Graph.setEdges]
+    EV -- no --> ERR
+    SET --> EMPTY{edge set empty?}
+    EMPTY -- yes --> ERR
+    P -- "s a b" --> SV{graph exists and a, b in 1..n?}
+    SV -- no --> ERR
+    SV -- yes --> BFS[Graph.shortestPath]
+    BFS -- found --> OUT[stdout: a-...-b]
+    BFS -- unreachable --> ERR
+    P -- other --> ERR[stderr: Error: ...]
+        </pre>
+
+        <h3 id="s2">Step 2 · Represent the graph</h3>
+        <p class="step-meta">graph.hpp</p>
+        <p>The graph needs three things: how many vertices there are, which vertices are neighbours, and a way to ask for a path.</p>
+        <div class="code"><div class="cap"><span>graph.hpp</span><span>class Graph</span></div><pre><code class="language-cpp">class Graph {
+public:
+    using Vertex = long long;
+    using Edge = std::pair&lt;Vertex, Vertex&gt;;
+
+    void reset(Vertex n);       // new graph with vertices 1..n
+    void invalidate();          // no valid vertex set (e.g. after "V 1")
+
+    bool hasVertices() const { return num_vertices_ &gt; 0; }
+    Vertex numVertices() const { return num_vertices_; }
+    bool isValidVertex(Vertex v) const { return v &gt;= 1 &amp;&amp; v &lt;= num_vertices_; }
+
+    void setEdges(const std::vector&lt;Edge&gt;&amp; edges);
+    void clearEdges() { adj_.clear(); }
+    std::vector&lt;Vertex&gt; shortestPath(Vertex src, Vertex dst) const;
+
+private:
+    Vertex num_vertices_ = 0;
+    // Sparse adjacency so a large V does not allocate a huge table.
+    std::unordered_map&lt;Vertex, std::unordered_set&lt;Vertex&gt;&gt; adj_;
+};</code></pre></div>
+        <p>Design choices in this header:</p>
+        <ul>
+          <li><strong><code>Vertex = long long</code>.</strong> Signed, so <code>-1</code> parses and is then rejected as out of range. 64-bit, so large inputs such as <code>V 1000000000</code> fit.</li>
+          <li><strong><code>num_vertices_ = 0</code> means "no graph".</strong> Valid graphs always have at least 2 vertices, so 0 is a safe marker. <code>hasVertices()</code> reads it.</li>
+          <li><strong><code>isValidVertex</code></strong> is the single place that encodes "IDs are <code>1..n</code>". Both <code>E</code> and <code>s</code> use it, so the rule cannot drift between the two.</li>
+          <li><strong>Adjacency as <code>unordered_map&lt;Vertex, unordered_set&lt;Vertex&gt;&gt;</code>.</strong> The map is sparse: only vertices that touch an edge take memory. The inner set removes duplicate edges automatically.</li>
+        </ul>
+
+        <h3 id="s3">Step 3 · Reset and invalidate</h3>
+        <p class="step-meta">graph.cpp</p>
+        <div class="code"><div class="cap"><span>graph.cpp</span><span>reset / invalidate</span></div><pre><code class="language-cpp">void Graph::reset(Vertex n) {
+    num_vertices_ = n;
+    adj_.clear();
+}
+
+void Graph::invalidate() {
+    num_vertices_ = 0;
+    adj_.clear();
+}</code></pre></div>
+        <p>Both clear the edges. This is how "a new <code>V</code> forgets all previous information" is enforced: there is no way to start a new vertex set while keeping old edges.</p>
+
+        <h3 id="s4">Step 4 · Store edges (self-loops and duplicates)</h3>
+        <p class="step-meta">graph.cpp · Graph::setEdges</p>
+        <div class="code"><div class="cap"><span>graph.cpp</span><span>setEdges</span></div><pre><code class="language-cpp">void Graph::setEdges(const std::vector&lt;Edge&gt;&amp; edges) {
+    adj_.clear();
+    for (const auto&amp; e : edges) {
+        if (e.first == e.second) {
+            continue;  // self-loops never shorten a path
+        }
+        // Sets make &lt;1,2&gt;, &lt;1,2&gt; and &lt;2,1&gt; all the same undirected edge.
+        adj_[e.first].insert(e.second);
+        adj_[e.second].insert(e.first);
+    }
+}</code></pre></div>
+        <ul>
+          <li><strong>Undirected:</strong> every edge is inserted in both directions.</li>
+          <li><strong>Self-loops</strong> (<code>&lt;1,1&gt;</code>) are skipped. The clarification allows ignoring them, and a loop can never be part of a shortest path.</li>
+          <li><strong>Duplicates</strong> merge because <code>insert</code> on a set does nothing if the value is already there.</li>
+          <li>The function trusts its input. Range checking is done by the caller first (Step 9), so this function never sees a bad vertex.</li>
+        </ul>
+
+        <h3 id="s5">Step 5 · Find the shortest path with BFS</h3>
+        <p class="step-meta">graph.cpp · Graph::shortestPath</p>
+        <p>Every edge has the same cost, so breadth-first search is enough: BFS visits vertices in order of distance from the source, so the first time it reaches the target it has found a shortest path. It runs in O(V + E).</p>
+        <div class="code"><div class="cap"><span>graph.cpp</span><span>shortestPath</span></div><pre><code class="language-cpp">std::vector&lt;Graph::Vertex&gt; Graph::shortestPath(Vertex src, Vertex dst) const {
+    if (src == dst) {
+        return {src};  // a single vertex is a valid path
+    }
+
+    // parent[v] = vertex we came from; also serves as the visited set.
+    std::unordered_map&lt;Vertex, Vertex&gt; parent;
+    std::queue&lt;Vertex&gt; frontier;
+    parent[src] = src;
+    frontier.push(src);
+
+    bool found = false;
+    while (!frontier.empty() &amp;&amp; !found) {
+        Vertex u = frontier.front();
+        frontier.pop();
+
+        auto it = adj_.find(u);
+        if (it == adj_.end()) {
+            continue;
+        }
+        for (Vertex w : it-&gt;second) {
+            if (parent.count(w)) {
+                continue;
+            }
+            parent[w] = u;
+            if (w == dst) {
+                found = true;  // stop as soon as the target is reached
+                break;
+            }
+            frontier.push(w);
+        }
+    }
+
+    if (!found) {
+        return {};
+    }
+
+    std::vector&lt;Vertex&gt; path;
+    for (Vertex v = dst; v != src; v = parent.at(v)) {
+        path.push_back(v);
+    }
+    path.push_back(src);
+    std::reverse(path.begin(), path.end());
+    return path;
+}</code></pre></div>
+        <p>How it works, in order:</p>
+        <ol>
+          <li><strong>Same vertex.</strong> If <code>src == dst</code>, return the one-vertex path right away. This covers the clarification rule, even for isolated vertices.</li>
+          <li><strong>Start the search.</strong> Put <code>src</code> in the queue and record it in <code>parent</code>. Using <code>parent</code> as the visited set saves a second container.</li>
+          <li><strong>Expand one layer at a time.</strong> Take the front vertex, look at its neighbours, and record each unvisited neighbour's parent. A vertex with no edges has no map entry, so <code>adj_.find</code> returns <code>end()</code> and is skipped. Using <code>find</code> instead of <code>adj_[u]</code> also keeps the function <code>const</code>.</li>
+          <li><strong>Stop early.</strong> The moment <code>dst</code> is discovered, break out. The handout suggests this ("terminating once you find the target node").</li>
+          <li><strong>Rebuild the path.</strong> Follow parent links from <code>dst</code> back to <code>src</code>, then reverse. An empty vector means "unreachable", and the caller turns that into an error.</li>
+        </ol>
+        <div class="note"><p>Worked example from the handout: in the <code>V 15</code> graph, BFS from 2 visits 6, 8 and 5 (distance 1), then reaches 10 from 8 (distance 2). Following parents gives 10 → 8 → 2, reversed to <code>2-8-10</code>. Going through 6 would also take two hops; which tie BFS picks depends on set order, and the handout allows either.</p></div>
+
+        <h3 id="s6">Step 6 · Read commands until EOF</h3>
+        <p class="step-meta">ece650-a2.cpp · main</p>
+        <div class="code"><div class="cap"><span>ece650-a2.cpp</span><span>main</span></div><pre><code class="language-cpp">int main() {
+    Graph g;
+    std::string line;
+
+    while (std::getline(std::cin, line)) {
+        std::istringstream args(line);
+        std::string cmd;
+        if (!(args &gt;&gt; cmd)) {
+            continue;  // skip blank lines quietly
+        }
+
+        if (cmd == "V") {
+            handleV(args, g);
+        } else if (cmd == "E") {
+            handleE(args, g);
+        } else if (cmd == "s") {
+            handleS(args, g);
+        } else {
+            reportError("unknown command '" + cmd + "'");
+        }
+    }
+    return 0;
+}</code></pre></div>
+        <ul>
+          <li><strong>One line = one command.</strong> <code>std::getline</code> reads a full line; an <code>istringstream</code> then splits it into tokens. A bad line can never spill into the next one.</li>
+          <li><strong>EOF ends the loop.</strong> <code>getline</code> returns false at EOF (Ctrl-D in a terminal, or the end of a piped file), and the program exits with status 0 and no output.</li>
+          <li><strong>Each handler gets the rest of the line</strong> (<code>args</code>) and the graph. The handlers are in an anonymous namespace, so they are private to this file.</li>
+          <li>An unknown command cannot happen in graded tests (syntax is always correct), but reporting it costs nothing and avoids silent failure.</li>
+        </ul>
+
+        <h3 id="s7">Step 7 · Parse numbers safely, and report errors in one place</h3>
+        <p class="step-meta">ece650-a2.cpp · parseVertex, reportError</p>
+        <div class="code"><div class="cap"><span>ece650-a2.cpp</span><span>helpers</span></div><pre><code class="language-cpp">void reportError(const std::string&amp; msg) {
+    std::cerr &lt;&lt; "Error: " &lt;&lt; msg &lt;&lt; std::endl;
+}
+
+// Parse a signed integer. Throws std::invalid_argument / std::out_of_range.
+Graph::Vertex parseVertex(const std::string&amp; s) {
+    std::size_t pos = 0;
+    long long v = std::stoll(s, &amp;pos);
+    if (pos != s.size()) {
+        throw std::invalid_argument("trailing characters");
+    }
+    return v;
+}</code></pre></div>
+        <ul>
+          <li><strong><code>reportError</code></strong> guarantees the <code>Error:</code> prefix and the stderr stream for every error. A typo in one message can't break the format.</li>
+          <li><strong><code>std::stoll</code></strong> handles signs. It throws <code>std::out_of_range</code> for a number like <code>99999999999999999999</code>, which the callers catch and report instead of crashing.</li>
+          <li>The <code>pos</code> check rejects input like <code>12abc</code>, which <code>stoll</code> alone would read as 12.</li>
+        </ul>
+
+        <h3 id="s8">Step 8 · Handle <code>V</code></h3>
+        <p class="step-meta">ece650-a2.cpp · handleV</p>
+        <div class="code"><div class="cap"><span>ece650-a2.cpp</span><span>handleV</span></div><pre><code class="language-cpp">void handleV(std::istringstream&amp; args, Graph&amp; g) {
+    std::string tok;
+    args &gt;&gt; tok;
+    g.invalidate();
+
+    Graph::Vertex n = 0;
+    try {
+        n = parseVertex(tok);
+    } catch (const std::exception&amp;) {
+        reportError("invalid number of vertices '" + tok + "'");
+        return;
+    }
+    if (n &lt;= 1) {
+        reportError("number of vertices must be greater than one");
+        return;
+    }
+    g.reset(n);
+}</code></pre></div>
+        <p><code>g.invalidate()</code> runs <em>before</em> validation on purpose. The clarification says a new <code>V</code> discards all previous graph information. If <code>V 1</code> left the old graph in place, a following <code>s</code> would wrongly answer from a graph the user meant to replace.</p>
+
+        <h3 id="s9">Step 9 · Handle <code>E</code></h3>
+        <p class="step-meta">ece650-a2.cpp · handleE</p>
+        <div class="code"><div class="cap"><span>ece650-a2.cpp</span><span>handleE</span></div><pre><code class="language-cpp">void handleE(std::istringstream&amp; args, Graph&amp; g) {
+    std::string spec;
+    args &gt;&gt; spec;
+
+    if (!g.hasVertices()) {
+        reportError("no valid vertex set defined for edges");
+        return;
+    }
+
+    static const std::regex edge_re("&lt;(-?[0-9]+),(-?[0-9]+)&gt;");
+    std::vector&lt;Graph::Edge&gt; edges;
+    for (auto it = std::sregex_iterator(spec.begin(), spec.end(), edge_re);
+         it != std::sregex_iterator(); ++it) {
+        const std::smatch&amp; m = *it;
+        Graph::Vertex a = 0;
+        Graph::Vertex b = 0;
+        try {
+            a = parseVertex(m[1].str());
+            b = parseVertex(m[2].str());
+        } catch (const std::exception&amp;) {
+            g.clearEdges();
+            reportError("edge " + m[0].str() + " has an invalid vertex");
+            return;
+        }
+        if (!g.isValidVertex(a) || !g.isValidVertex(b)) {
+            g.clearEdges();
+            reportError("edge " + m[0].str() + " references a vertex outside 1.." +
+                        std::to_string(g.numVertices()));
+            return;
+        }
+        edges.emplace_back(a, b);
+    }
+
+    g.setEdges(edges);
+    if (edges.empty()) {
+        reportError("empty edge set");
+    }
+}</code></pre></div>
+        <ol>
+          <li><strong>Read the whole set as one token.</strong> There is no whitespace inside <code>{ }</code>, so <code>args &gt;&gt; spec</code> captures <code>{&lt;2,6&gt;,&lt;2,8&gt;,…}</code> in one go.</li>
+          <li><strong>Need a valid <code>V</code> first.</strong> After <code>V 1</code> there is no vertex set, so the edges can't be checked; report that.</li>
+          <li><strong>Find each edge with a regex.</strong> The pattern <code>&lt;(-?[0-9]+),(-?[0-9]+)&gt;</code> matches one edge and captures both endpoints. <code>-?</code> lets negative IDs through so they are reported as out of range rather than skipped. The regex is <code>static const</code>, so it is compiled once, not on every <code>E</code>.</li>
+          <li><strong>Check every endpoint, then commit.</strong> Edges are collected in a local vector. If any endpoint is bad, nothing is applied: the graph's edges are cleared and one error is printed. Only a fully valid set reaches <code>setEdges</code>.</li>
+          <li><strong>Empty set.</strong> For <code>E {}</code> the loop finds no matches. The (empty) set is applied so the vertices stay usable, and an error is printed as the clarification suggests.</li>
+        </ol>
+
+        <h3 id="s10">Step 10 · Handle <code>s</code> and format the path</h3>
+        <p class="step-meta">ece650-a2.cpp · handleS</p>
+        <div class="code"><div class="cap"><span>ece650-a2.cpp</span><span>handleS</span></div><pre><code class="language-cpp">void handleS(std::istringstream&amp; args, const Graph&amp; g) {
+    std::string tok_a;
+    std::string tok_b;
+    args &gt;&gt; tok_a &gt;&gt; tok_b;
+
+    if (!g.hasVertices()) {
+        reportError("no valid graph defined");
+        return;
+    }
+
+    Graph::Vertex a = 0;
+    Graph::Vertex b = 0;
+    try {
+        a = parseVertex(tok_a);
+        b = parseVertex(tok_b);
+    } catch (const std::exception&amp;) {
+        reportError("invalid vertex in shortest path query");
+        return;
+    }
+    if (!g.isValidVertex(a) || !g.isValidVertex(b)) {
+        reportError("vertex does not exist in the graph (valid range 1.." +
+                    std::to_string(g.numVertices()) + ")");
+        return;
+    }
+
+    std::vector&lt;Graph::Vertex&gt; path = g.shortestPath(a, b);
+    if (path.empty()) {
+        reportError("no path exists between " + std::to_string(a) + " and " +
+                    std::to_string(b));
+        return;
+    }
+
+    std::ostringstream out;
+    for (std::size_t i = 0; i &lt; path.size(); ++i) {
+        if (i &gt; 0) {
+            out &lt;&lt; '-';
+        }
+        out &lt;&lt; path[i];
+    }
+    // endl flushes so the answer appears immediately in interactive use.
+    std::cout &lt;&lt; out.str() &lt;&lt; std::endl;
+}</code></pre></div>
+        <ul>
+          <li>The checks run in order of cost: is there a graph, are the numbers readable, are they in range, then BFS. Each failure prints exactly one error line.</li>
+          <li><code>const Graph&amp;</code>: a query can never change the graph.</li>
+          <li><strong>Formatting:</strong> a dash goes <em>before</em> every vertex except the first, so the line never starts or ends with <code>-</code>. A one-vertex path prints just the number. The path is built in an <code>ostringstream</code> and written with one <code>&lt;&lt;</code>, so a line can't be half-printed.</li>
+        </ul>
+
+        <h3 id="s11">Step 11 · Error messages used</h3>
+        <p>All of them start with <code>Error: </code> and go to stderr.</p>
+        <div class="tbl"><table>
+          <thead><tr><th>Situation</th><th>Message after <code>Error: </code></th></tr></thead>
+          <tbody>
+            <tr><td><code>V 0</code>, <code>V 1</code>, negative</td><td>number of vertices must be greater than one</td></tr>
+            <tr><td><code>V</code> with a number too large to read</td><td>invalid number of vertices '…'</td></tr>
+            <tr><td><code>E</code> without a valid <code>V</code></td><td>no valid vertex set defined for edges</td></tr>
+            <tr><td>Edge endpoint outside <code>1..n</code></td><td>edge &lt;a,b&gt; references a vertex outside 1..n</td></tr>
+            <tr><td>Edge endpoint too large to read</td><td>edge &lt;a,b&gt; has an invalid vertex</td></tr>
+            <tr><td><code>E {}</code></td><td>empty edge set</td></tr>
+            <tr><td><code>s</code> without a valid graph</td><td>no valid graph defined</td></tr>
+            <tr><td><code>s</code> vertex outside <code>1..n</code></td><td>vertex does not exist in the graph (valid range 1..n)</td></tr>
+            <tr><td><code>s</code> vertex too large to read</td><td>invalid vertex in shortest path query</td></tr>
+            <tr><td>No path between two different vertices</td><td>no path exists between a and b</td></tr>
+            <tr><td>Unrecognised first token</td><td>unknown command '…'</td></tr>
+          </tbody>
+        </table></div>
+
+        <h3 id="s12">Step 12 · Build file and documentation</h3>
+        <p class="step-meta">CMakeLists.txt · README.md · user.yml</p>
+        <div class="code"><div class="cap"><span>CMakeLists.txt</span><span>cmake</span></div><pre><code class="nohighlight">cmake_minimum_required(VERSION 3.10)
+project(ece650-a2 CXX)
+
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release)
+endif()
+
+add_compile_options(-Wall -Wextra)
+
+add_executable(ece650-a2 ece650-a2.cpp graph.cpp)</code></pre></div>
+        <ul>
+          <li>C++11 is enough for everything used (<code>std::regex</code>, <code>std::stoll</code>, <code>unordered_map</code>), and is supported by any compiler on the grading machine.</li>
+          <li>The build type defaults to Release, so the graded run uses an optimised binary without extra flags.</li>
+          <li><code>-Wall -Wextra</code> keeps warnings visible, which helps the style mark.</li>
+          <li><code>README.md</code> holds the report: file list, build steps, a mermaid flowchart, the design decisions above, and challenges. <code>user.yml</code> needs your real details.</li>
+        </ul>
+      </section>
+
+      <!-- 4 -->
+      <section id="testing">
+        <h2><span class="num">04</span>How we tested</h2>
+        <p>Testing was done by piping prepared input into the program and comparing stdout and stderr against what the rules require.</p>
+
+        <h3>Build</h3>
+        <p>CMake is not installed on the machine where this was written, so the code was compiled directly with the same standard and warning flags that <code>CMakeLists.txt</code> sets:</p>
+        <div class="code"><div class="cap"><span>terminal</span><span>bash</span></div><pre><code class="language-bash">cd a2 &amp;&amp; mkdir build
+c++ -std=c++11 -Wall -Wextra -O2 ece650-a2.cpp graph.cpp -o build/ece650-a2</code></pre></div>
+        <div class="note warn"><p>The official command <code>cd a2 &amp;&amp; mkdir build &amp;&amp; cd build &amp;&amp; cmake ../ &amp;&amp; make</code> has not been run yet. Run it once on the course machine (or after <code>brew install cmake</code>) before submitting.</p></div>
+
+        <h3>Run</h3>
+        <p>All test commands were sent in one piped session. This also tests that the program keeps going after each error and that a new <code>V</code> really resets state. <code>2&gt;&amp;1</code> merges stderr into the same view so the order of outputs and errors can be checked.</p>
+        <div class="code"><div class="cap"><span>terminal</span><span>bash</span></div><pre><code class="language-bash">printf 'V 15\nE {&lt;2,6&gt;,&lt;2,8&gt;,&lt;2,5&gt;,&lt;6,5&gt;,&lt;5,8&gt;,&lt;6,10&gt;,&lt;10,8&gt;}\ns 2 10\n...' \
+  | ./ece650-a2 2&gt;&amp;1
+echo "exit=$?"</code></pre></div>
+
+        <h3>What the tests cover</h3>
+        <div class="tbl"><table>
+          <thead><tr><th>Group</th><th>Inputs</th><th>Rule being checked</th></tr></thead>
+          <tbody>
+            <tr><td>Handout sample</td><td><code>V 15</code> + edges + <code>s 2 10</code>; <code>V 5</code> + edges + <code>s 5 1</code></td><td>Correct paths and exact output format.</td></tr>
+            <tr><td>Same vertex</td><td><code>s 3 3</code>, and <code>s 1 1</code> / <code>s 2 2</code> with no edges</td><td>Single vertex is a valid path, including isolated vertices.</td></tr>
+            <tr><td>Out-of-range queries</td><td><code>s 0 2</code>, <code>s -1 2</code>, <code>s 1 6</code> on <code>V 5</code></td><td>0, negative and too-large IDs are errors.</td></tr>
+            <tr><td>Invalid <code>V</code></td><td><code>V 1</code>, <code>V 0</code>, then <code>E</code> and <code>s</code></td><td>Error, old graph forgotten, program keeps running.</td></tr>
+            <tr><td>Invalid <code>E</code></td><td><code>E {&lt;1,2&gt;,&lt;2,5&gt;}</code> on <code>V 4</code>; <code>E {&lt;-1,2&gt;}</code> on <code>V 3</code></td><td>Error, no partial edges kept, vertices still usable.</td></tr>
+            <tr><td>Empty <code>E</code></td><td><code>E {}</code> then <code>s 2 2</code>, <code>s 1 2</code></td><td>Error, no crash, queries still behave correctly.</td></tr>
+            <tr><td>Self-loops and duplicates</td><td><code>E {&lt;1,1&gt;,&lt;1,2&gt;,&lt;2,1&gt;,&lt;1,2&gt;,&lt;3,4&gt;}</code></td><td>Accepted, correct paths, no-path between components.</td></tr>
+            <tr><td>Robustness</td><td><code>V 99999999999999999999</code>, <code>V 1000000000</code> with an edge to vertex 1000000000, <code>foo</code></td><td>No crash or huge allocation; errors where needed.</td></tr>
+            <tr><td>EOF</td><td>End of the piped input</td><td>Clean exit, status 0, nothing extra printed.</td></tr>
+          </tbody>
+        </table></div>
+      </section>
+
+      <!-- 5 -->
+      <section id="results">
+        <h2><span class="num">05</span>Results</h2>
+        <p>The build produced <strong>no warnings</strong> with <code>-Wall -Wextra</code>. Every case gave the expected result, and the program exited with status <strong>0</strong>.</p>
+
+        <div class="tbl"><table>
+          <thead><tr><th>Input (graph context)</th><th>Output</th><th>Stream</th><th>Result</th></tr></thead>
+          <tbody>
+            <tr><td><code>s 2 10</code> (V 15 sample)</td><td class="mono">2-8-10</td><td>stdout</td><td><span class="pill ok">pass</span></td></tr>
+            <tr><td><code>s 5 1</code> (V 5 sample)</td><td class="mono">5-2-3-1</td><td>stdout</td><td><span class="pill ok">pass</span></td></tr>
+            <tr><td><code>s 3 3</code> (V 5)</td><td class="mono">3</td><td>stdout</td><td><span class="pill ok">pass</span></td></tr>
+            <tr><td><code>s 0 2</code> (V 5)</td><td class="mono">Error: vertex does not exist in the graph (valid range 1..5)</td><td>stderr</td><td><span class="pill ok">pass</span></td></tr>
+            <tr><td><code>s -1 2</code> (V 5)</td><td class="mono">Error: vertex does not exist in the graph (valid range 1..5)</td><td>stderr</td><td><span class="pill ok">pass</span></td></tr>
+            <tr><td><code>s 1 6</code> (V 5)</td><td class="mono">Error: vertex does not exist in the graph (valid range 1..5)</td><td>stderr</td><td><span class="pill ok">pass</span></td></tr>
+            <tr><td><code>V 1</code></td><td class="mono">Error: number of vertices must be greater than one</td><td>stderr</td><td><span class="pill ok">pass</span></td></tr>
+            <tr><td><code>E {&lt;1,2&gt;}</code> (after V 1)</td><td class="mono">Error: no valid vertex set defined for edges</td><td>stderr</td><td><span class="pill ok">pass</span></td></tr>
+            <tr><td><code>s 1 1</code> (after V 1)</td><td class="mono">Error: no valid graph defined</td><td>stderr</td><td><span class="pill ok">pass</span></td></tr>
+            <tr><td><code>V 0</code></td><td class="mono">Error: number of vertices must be greater than one</td><td>stderr</td><td><span class="pill ok">pass</span></td></tr>
+            <tr><td><code>E {&lt;1,2&gt;,&lt;2,5&gt;}</code> (V 4)</td><td class="mono">Error: edge &lt;2,5&gt; references a vertex outside 1..4</td><td>stderr</td><td><span class="pill ok">pass</span></td></tr>
+            <tr><td><code>s 1 2</code> (V 4, edges rejected)</td><td class="mono">Error: no path exists between 1 and 2</td><td>stderr</td><td><span class="pill ok">pass</span></td></tr>
+            <tr><td><code>s 1 1</code> (V 4, edges rejected)</td><td class="mono">1</td><td>stdout</td><td><span class="pill ok">pass</span></td></tr>
+            <tr><td><code>E {}</code> (V 4)</td><td class="mono">Error: empty edge set</td><td>stderr</td><td><span class="pill ok">pass</span></td></tr>
+            <tr><td><code>s 2 2</code> (V 4, no edges)</td><td class="mono">2</td><td>stdout</td><td><span class="pill ok">pass</span></td></tr>
+            <tr><td><code>s 1 2</code> (V 4, no edges)</td><td class="mono">Error: no path exists between 1 and 2</td><td>stderr</td><td><span class="pill ok">pass</span></td></tr>
+            <tr><td><code>s 2 1</code> (self-loops + duplicates)</td><td class="mono">2-1</td><td>stdout</td><td><span class="pill ok">pass</span></td></tr>
+            <tr><td><code>s 1 3</code> (two components)</td><td class="mono">Error: no path exists between 1 and 3</td><td>stderr</td><td><span class="pill ok">pass</span></td></tr>
+            <tr><td><code>s 4 3</code> (two components)</td><td class="mono">4-3</td><td>stdout</td><td><span class="pill ok">pass</span></td></tr>
+            <tr><td><code>E {&lt;-1,2&gt;}</code> (V 3)</td><td class="mono">Error: edge &lt;-1,2&gt; references a vertex outside 1..3</td><td>stderr</td><td><span class="pill ok">pass</span></td></tr>
+            <tr><td><code>V 99999999999999999999</code></td><td class="mono">Error: invalid number of vertices '99999999999999999999'</td><td>stderr</td><td><span class="pill ok">pass</span></td></tr>
+            <tr><td><code>s 1000000000 1</code> (V 1000000000)</td><td class="mono">1000000000-1</td><td>stdout</td><td><span class="pill ok">pass</span></td></tr>
+            <tr><td><code>foo</code></td><td class="mono">Error: unknown command 'foo'</td><td>stderr</td><td><span class="pill ok">pass</span></td></tr>
+            <tr><td>EOF</td><td class="mono">exit=0</td><td>—</td><td><span class="pill ok">pass</span></td></tr>
+          </tbody>
+        </table></div>
+
+        <h3>Part of the transcript, by stream</h3>
+        <div class="term" role="group" aria-label="Test transcript excerpt">
+          <div class="row in"><span class="s">stdin</span><span class="t">V 4</span></div>
+          <div class="row in"><span class="s">stdin</span><span class="t">E {&lt;1,2&gt;,&lt;2,5&gt;}</span></div>
+          <div class="row err"><span class="s">stderr</span><span class="t">Error: edge &lt;2,5&gt; references a vertex outside 1..4</span></div>
+          <div class="row in"><span class="s">stdin</span><span class="t">s 1 2</span></div>
+          <div class="row err"><span class="s">stderr</span><span class="t">Error: no path exists between 1 and 2</span></div>
+          <div class="row in"><span class="s">stdin</span><span class="t">s 1 1</span></div>
+          <div class="row out"><span class="s">stdout</span><span class="t">1</span></div>
+          <div class="row in"><span class="s">stdin</span><span class="t">V 4</span></div>
+          <div class="row in"><span class="s">stdin</span><span class="t">E {&lt;1,1&gt;,&lt;1,2&gt;,&lt;2,1&gt;,&lt;1,2&gt;,&lt;3,4&gt;}</span></div>
+          <div class="row in"><span class="s">stdin</span><span class="t">s 2 1</span></div>
+          <div class="row out"><span class="s">stdout</span><span class="t">2-1</span></div>
+          <div class="row in"><span class="s">stdin</span><span class="t">s 1 3</span></div>
+          <div class="row err"><span class="s">stderr</span><span class="t">Error: no path exists between 1 and 3</span></div>
+        </div>
+
+        <h3>Still to do before submitting</h3>
+        <ul>
+          <li>Run the official CMake build command once.</li>
+          <li>Fill in <code>user.yml</code>.</li>
+          <li>If the skeleton already ships a <code>CMakeLists.txt</code> (for example with a test target), keep it and make sure it builds <code>ece650-a2.cpp</code> and <code>graph.cpp</code> into <code>ece650-a2</code>.</li>
+        </ul>
+      </section>
+
+      <!-- 6 -->
+      <section id="alternatives">
+        <h2><span class="num">06</span>Alternative approaches</h2>
+        <p>Each choice above has workable alternatives. None of these are needed, but they are useful to know, and some may fit if the specs change.</p>
+
+        <div class="alt-group">
+          <h3>A · Other shortest-path algorithms</h3>
+          <p><strong>Dijkstra's algorithm.</strong> Needed only if edges had weights. With equal weights it gives the same answer as BFS but costs O((V + E) log V) because of the priority queue.</p>
+          <div class="code"><div class="cap"><span>alternative</span><span>Dijkstra with std::priority_queue</span></div><pre><code class="language-cpp">using P = std::pair&lt;long long, Vertex&gt;;  // (distance, vertex)
+std::priority_queue&lt;P, std::vector&lt;P&gt;, std::greater&lt;P&gt;&gt; pq;
+std::unordered_map&lt;Vertex, long long&gt; dist;
+dist[src] = 0;
+pq.push({0, src});
+while (!pq.empty()) {
+    auto [d, u] = pq.top();   // C++17; in C++11 use .first / .second
+    pq.pop();
+    if (u == dst) break;      // stop once the target is settled
+    if (d &gt; dist[u]) continue;
+    for (Vertex w : adj_.at(u)) {
+        if (!dist.count(w) || d + 1 &lt; dist[w]) {
+            dist[w] = d + 1;
+            parent[w] = u;
+            pq.push({d + 1, w});
+        }
+    }
+}</code></pre></div>
+          <p><strong>Bellman-Ford.</strong> Relaxes every edge V−1 times, O(V·E). It handles negative weights, which this problem doesn't have, so it is only slower here.</p>
+          <p><strong>Bidirectional BFS.</strong> Searches from both ends and stops when the frontiers meet. Faster on large graphs, but more code and harder to get the path reconstruction right.</p>
+          <p><strong>Floyd-Warshall.</strong> Precomputes all pairs in O(V³) after each <code>E</code>, making each query instant. Only worth it for tiny graphs with many queries.</p>
+        </div>
+
+        <div class="alt-group">
+          <h3>B · Other ways to store the graph</h3>
+          <p><strong>Adjacency list as <code>vector&lt;vector&lt;int&gt;&gt;</code>.</strong> The textbook choice (CLRS 22.1). Simple and fast, indexed directly by vertex ID. It allocates <code>V+1</code> slots, so a very large <code>V</code> uses a lot of memory, and duplicates must be removed by hand.</p>
+          <div class="code"><div class="cap"><span>alternative</span><span>dense adjacency list</span></div><pre><code class="language-cpp">std::vector&lt;std::vector&lt;int&gt;&gt; adj(n + 1);   // index 0 unused
+adj[a].push_back(b);
+adj[b].push_back(a);
+
+std::vector&lt;int&gt; parent(n + 1, -1);         // -1 = not visited
+parent[src] = src;</code></pre></div>
+          <p><strong>Adjacency matrix</strong> (<code>vector&lt;vector&lt;bool&gt;&gt;</code> of size n×n). Duplicates are free and edge lookup is O(1), but memory is O(V²) and BFS has to scan whole rows.</p>
+          <p><strong>Edge list only.</strong> Keep the parsed <code>vector&lt;Edge&gt;</code> and scan it for neighbours during BFS. Very little code, but each step is O(E).</p>
+          <p><strong><code>std::set</code> / <code>std::map</code></strong> instead of the unordered versions: neighbours come out sorted, so tie-breaking between equal-length paths becomes predictable (always the smallest ID first).</p>
+        </div>
+
+        <div class="alt-group">
+          <h3>C · Other ways to parse the edge set</h3>
+          <p><strong>Replace the punctuation with spaces, then read numbers.</strong> Turns <code>{&lt;1,2&gt;,&lt;3,4&gt;}</code> into <code>  1 2   3 4  </code>. Short and needs no regex. It relies on input always being well-formed, which the spec guarantees.</p>
+          <div class="code"><div class="cap"><span>alternative</span><span>replace-and-stream</span></div><pre><code class="language-cpp">for (char&amp; c : spec) {
+    if (c == '{' || c == '}' || c == '&lt;' || c == '&gt;' || c == ',') c = ' ';
+}
+std::istringstream nums(spec);
+long long a, b;
+while (nums &gt;&gt; a &gt;&gt; b) {
+    edges.emplace_back(a, b);
+}</code></pre></div>
+          <p><strong>Walk the string by hand.</strong> Look for each <code>&lt;</code>, read an integer, skip the comma, read another, expect <code>&gt;</code>. The most control, and the fastest, but the longest code.</p>
+          <div class="code"><div class="cap"><span>alternative</span><span>manual scan with strtoll</span></div><pre><code class="language-cpp">const char* p = spec.c_str();
+while ((p = std::strchr(p, '&lt;')) != nullptr) {
+    char* end;
+    long long a = std::strtoll(p + 1, &amp;end, 10);   // after '&lt;'
+    long long b = std::strtoll(end + 1, &amp;end, 10); // after ','
+    edges.emplace_back(a, b);
+    p = end;
+}</code></pre></div>
+          <p><strong><code>sscanf</code> in a loop</strong> with the format <code>"&lt;%lld,%lld&gt;%n"</code>, using <code>%n</code> to know how far to advance. C-style, compact, but easy to get wrong.</p>
+          <p><strong>A different regex.</strong> <code>R"(&lt;(-?\d+),(-?\d+)&gt;)"</code> using a raw string literal is the same pattern written more readably. <code>std::regex_search</code> in a loop can replace <code>sregex_iterator</code>.</p>
+        </div>
+
+        <div class="alt-group">
+          <h3>D · Other ways to read commands</h3>
+          <p><strong>Read tokens straight from <code>std::cin</code></strong> instead of whole lines:</p>
+          <div class="code"><div class="cap"><span>alternative</span><span>token-based loop</span></div><pre><code class="language-cpp">char cmd;
+while (std::cin &gt;&gt; cmd) {
+    if (cmd == 'V') { long long n; std::cin &gt;&gt; n; /* ... */ }
+    else if (cmd == 'E') { std::string spec; std::cin &gt;&gt; spec; /* ... */ }
+    else if (cmd == 's') { long long a, b; std::cin &gt;&gt; a &gt;&gt; b; /* ... */ }
+}</code></pre></div>
+          <p>Shorter, but a mistake on one line can shift every later read, and a failed <code>&gt;&gt;</code> leaves <code>cin</code> in a fail state that must be cleared. The line-based version is more forgiving.</p>
+          <p><strong>A <code>switch</code> on the first character</strong> (<code>switch (line[0])</code>) instead of comparing strings. Works because every command is one letter.</p>
+          <p><strong>A dispatch table</strong>, <code>std::map&lt;std::string, std::function&lt;void(std::istringstream&amp;, Graph&amp;)&gt;&gt;</code>, which makes adding commands (as later assignments do) a one-line change.</p>
+        </div>
+
+        <div class="alt-group">
+          <h3>E · Other ways to parse numbers</h3>
+          <ul>
+            <li><strong><code>std::stoi</code></strong> (int) instead of <code>std::stoll</code>: fine for small graphs, throws earlier on large values.</li>
+            <li><strong><code>istringstream &gt;&gt; n</code> with a fail check</strong>: no exceptions, but on overflow it sets the stream to failed and you must check for that.</li>
+            <li><strong><code>std::strtoll</code></strong>: C-style, reports errors through <code>errno</code> and an end pointer instead of exceptions.</li>
+            <li><strong><code>std::from_chars</code></strong> (C++17): fastest and exception-free, but needs a newer standard than C++11.</li>
+          </ul>
+        </div>
+
+        <div class="alt-group">
+          <h3>F · Other error-handling policies</h3>
+          <p>The clarifications leave some room here. Each of these is defensible:</p>
+          <ul>
+            <li><strong>Keep the valid edges of a partly bad <code>E</code></strong> and drop only the bad ones. More lenient, but paths may then be computed on a graph the user didn't intend.</li>
+            <li><strong>Invalidate the whole graph on a bad <code>E</code></strong>, so every later <code>s</code> errors until the next <code>V</code>. Stricter than ours; <code>s v v</code> would then print an error instead of <code>v</code>.</li>
+            <li><strong>Accept <code>E {}</code> silently.</strong> The clarification says it "should ideally" be an error, so we report it, but a graph with no edges is still a valid graph.</li>
+            <li><strong>Store self-loops</strong> instead of skipping them. BFS would just find the vertex already visited, so results don't change.</li>
+          </ul>
+        </div>
+
+        <div class="alt-group">
+          <h3>G · Other ways to format and print the path</h3>
+          <p><strong>Print the separator after</strong> each vertex and stop before the last. Same result, just a different loop shape.</p>
+          <p><strong>Recursive printing from parent links</strong>, which avoids the reverse step:</p>
+          <div class="code"><div class="cap"><span>alternative</span><span>recursive print</span></div><pre><code class="language-cpp">void printPath(const std::unordered_map&lt;Vertex, Vertex&gt;&amp; parent,
+               Vertex src, Vertex v, std::ostream&amp; out) {
+    if (v != src) {
+        printPath(parent, src, parent.at(v), out);
+        out &lt;&lt; '-';
+    }
+    out &lt;&lt; v;
+}</code></pre></div>
+          <p>Very long paths could overflow the call stack, which is why the loop-and-reverse version was used.</p>
+          <p><strong><code>'\n'</code> plus an explicit <code>std::flush</code></strong> instead of <code>std::endl</code>. Equivalent here. With a lot of output, flushing once at the end would be faster, but the interactive rule wants each answer to appear right away.</p>
+          <p><strong>Run BFS from the target</strong> instead of the source. Then parent links already point toward the target, and you can print from <code>src</code> forward without reversing.</p>
+        </div>
+
+        <div class="alt-group">
+          <h3>H · Other code organisation choices</h3>
+          <ul>
+            <li><strong>Single file.</strong> Everything in <code>ece650-a2.cpp</code>. Fine for this size, but the split makes the graph reusable in later assignments, which build on A2.</li>
+            <li><strong>A separate parser module</strong> (<code>parser.hpp/.cpp</code>) that turns lines into command structs, so <code>main</code> only dispatches.</li>
+            <li><strong><code>std::optional&lt;std::vector&lt;Vertex&gt;&gt;</code></strong> (C++17) as the return type of <code>shortestPath</code>, making "no path" explicit instead of relying on an empty vector.</li>
+            <li><strong>Unit tests</strong> with Catch2 or GoogleTest as a second CMake target (<code>add_library</code> for the graph, <code>add_executable</code> for tests), run with <code>ctest</code>. Useful for the style mark, but adds build complexity.</li>
+            <li><strong>A shell test script</strong> that pipes input files and <code>diff</code>s against expected output files, so all the cases in section 5 can be rerun with one command.</li>
+          </ul>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+  try {
+    if (window.hljs) {
+      document.querySelectorAll('pre code[class^="language-"]').forEach(function (el) { hljs.highlightElement(el); });
+    }
+  } catch (e) { /* plain code is fine without highlighting */ }
+</script>
